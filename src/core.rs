@@ -110,17 +110,13 @@ fn next_index(g: &Inner) -> Option<usize> {
 
 /// Indice del brano precedente.
 fn prev_index(g: &Inner) -> usize {
+    // Previous NON usa lo shuffle: torna sempre al brano precedente
+    // (il random vale solo in avanti, con next_index).
     let n = g.queue.len();
     if n <= 1 {
         return 0;
     }
-    if g.shuffle {
-        let mut idx = rand::thread_rng().gen_range(0..n);
-        while idx == g.current {
-            idx = rand::thread_rng().gen_range(0..n);
-        }
-        idx
-    } else if g.current > 0 {
+    if g.current > 0 {
         g.current - 1
     } else if g.repeat == Repeat::Playlist {
         n - 1
