@@ -9,7 +9,7 @@ use zbus::zvariant::{ObjectPath, Value};
 use zbus::Connection;
 
 use crate::core::{Change, Player, Repeat, Status};
-use crate::meta::{write_art_to_file, Track};
+use crate::meta::{load_meta, write_art_to_file, Track};
 
 const IFC_PLAYER: &str = "org.mpris.MediaPlayer2.Player";
 
@@ -37,9 +37,29 @@ fn metadata_value(track: &Option<Track>) -> Value<'static> {
     Value::from(map)
 }
 
+/// Decodifica le sequenze percent `%%XX` (es. gli spazi `%%20`) che i
+/// client MPRIS inviano nelle URI `file://`.
+fn percent_decode(s: &str) -> String {
+    let bytes = s.as_bytes();
+    let mut out: Vec<u8> = Vec::with_capacity(bytes.len());
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == b'%' && i + 2 < bytes.len() {
+            if let Ok(h) = u8::from_str_radix(&s[i + 1..i + 3], 16) {
+                out.push(h);
+                i += 3;
+                continue;
+            }
+        }
+        out.push(bytes[i]);
+        i += 1;
+    }
+    String::from_utf8_lossy(&out).into_owned()
+}
+
 fn uri_to_path(uri: &str) -> Option<PathBuf> {
     let s = uri.strip_prefix("file://").unwrap_or(uri);
-    Some(PathBuf::from(s))
+    Some(PathBuf::from(percent_decode(s)))
 }
 
 /// Esegue `load_source` (I/O pesante: parse M3U + metadati lofty) su un thread
@@ -48,6 +68,28 @@ async fn blocking_load_source(player: Arc<Player>, path: PathBuf) -> Result<Chan
     let (tx, rx) = tokio::sync::oneshot::channel();
     std::thread::spawn(move || {
         let ch = player.load_source(path);
+        let _ = tx.send(ch);
+    });
+    rx.await.map_err(|e| e.to_string())
+}
+
+/// Costruisce la coda da una lista di URI (I/O pesante: metadati lofty)
+/// su un thread std. Restituisce il `Change`.
+async fn blocking_load_uris(
+    player: Arc<Player>,
+    uris: Vec<String>,
+) -> Result<Change, String> {
+    let (tx, rx) = tokio::sync::oneshot::channel();
+    std::thread::spawn(move || {
+        let mut tracks = Vec::new();
+        for u in &uris {
+            if let Some(p) = uri_to_path(u) {
+                if p.exists() {
+                    tracks.push(load_meta(&p));
+                }
+            }
+        }
+        let ch = player.load_tracks(tracks);
         let _ = tx.send(ch);
     });
     rx.await.map_err(|e| e.to_string())
@@ -212,13 +254,11 @@ impl MprisPlayer {
     }
 
     async fn open_uris(&self, uris: Vec<String>) -> Result<(), Error> {
-        if let Some(first) = uris.first() {
-            if let Some(path) = uri_to_path(first) {
-                let ch = blocking_load_source(self.player.clone(), path)
-                    .await
-                    .map_err(|e| Error::from(zbus::fdo::Error::Failed(e.to_string())))?;
-                let _ = self.notify_tx.send(ch);
-            }
+        if !uris.is_empty() {
+            let ch = blocking_load_uris(self.player.clone(), uris)
+                .await
+                .map_err(|e| Error::from(zbus::fdo::Error::Failed(e.to_string())))?;
+            let _ = self.notify_tx.send(ch);
         }
         Ok(())
     }

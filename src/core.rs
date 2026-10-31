@@ -171,6 +171,24 @@ impl Player {
         Change::TrackChanged
     }
 
+    /// Imposta la coda su una lista di brani già costruiti (es. da
+    /// `OpenUris` con più file). Riparte dal primo e riproduce.
+    pub fn load_tracks(&self, tracks: Vec<Track>) -> Change {
+        if tracks.is_empty() {
+            return Change::None;
+        }
+        let first = tracks[0].clone();
+        {
+            let mut g = self.inner.lock().unwrap();
+            g.queue = tracks;
+            g.current = 0;
+            g.status = Status::Playing;
+            g.history.clear();
+        }
+        self.engine.send(DecCmd::LoadFile { track: first });
+        Change::TrackChanged
+    }
+
     pub fn play(&self) -> Change {
         let empty = self.inner.lock().unwrap().queue.is_empty();
         if empty {
