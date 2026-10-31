@@ -73,6 +73,9 @@ pub struct Inner {
     pub shuffle: bool,
     pub repeat: Repeat,
     pub volume: f64,
+    /// Indici dei brani già ascoltati, più recente in cima (per Previous
+    /// corretto anche con shuffle attivo).
+    pub history: Vec<usize>,
 }
 
 /// Indice del prossimo brano (None = fine lista, stop).
@@ -142,6 +145,7 @@ impl Player {
                 shuffle: false,
                 repeat: Repeat::Off,
                 volume: 1.0,
+                history: Vec::new(),
             }),
             engine,
         };
@@ -161,6 +165,7 @@ impl Player {
             g.queue = tracks;
             g.current = 0;
             g.status = Status::Playing;
+            g.history.clear();
         }
         self.engine.send(DecCmd::LoadFile { track: first });
         Change::TrackChanged
@@ -201,6 +206,12 @@ impl Player {
             let mut g = self.inner.lock().unwrap();
             match next_index(&g) {
                 Some(i) => {
+                    // Memoria del brano corrente (per Previous), tranne il
+                    // repeat-track (stesso brano, niente push).
+                    let cur = g.current;
+                    if i != cur {
+                        g.history.push(cur);
+                    }
                     g.current = i;
                     g.status = Status::Playing;
                     g.queue[i].clone()
@@ -228,7 +239,9 @@ impl Player {
             if g.queue.is_empty() {
                 return Change::None;
             }
-            let i = prev_index(&g);
+            // Storia (corretto anche con shuffle); se vuota, fallback a
+            // prev_index (brano precedente nell'ordine della playlist).
+            let i = g.history.pop().unwrap_or_else(|| prev_index(&g));
             g.current = i;
             g.status = Status::Playing;
             g.queue[i].clone()
