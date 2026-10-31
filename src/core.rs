@@ -37,9 +37,11 @@ pub enum Repeat {
 
 impl Repeat {
     pub fn from_mpris(s: &str) -> Self {
-        match s {
+        // Case-insensitive: i client MPRIS inviano sia "Track" sia "track".
+        // Accetta anche "continuous" (termine standard MPRIS per loop playlist).
+        match s.to_ascii_lowercase().as_str() {
             "track" => Repeat::Track,
-            "playlist" => Repeat::Playlist,
+            "playlist" | "continuous" => Repeat::Playlist,
             _ => Repeat::Off,
         }
     }
