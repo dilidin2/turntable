@@ -179,7 +179,10 @@ impl MprisPlayer {
     }
 
     async fn seek(&self, position: i64) -> Result<(), Error> {
-        let secs = position as f64 / 1_000_000.0;
+        // MPRIS: Seek e' un offset RELATIVO in microsecondi rispetto alla
+        // posizione corrente (i client inviano target - corrente).
+        let cur = self.player.position_secs();
+        let secs = (cur + position as f64 / 1_000_000.0).max(0.0);
         let ch = self.player.seek(secs);
         let _ = self.notify_tx.send(ch);
         Ok(())

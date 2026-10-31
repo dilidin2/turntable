@@ -301,6 +301,9 @@ fn decoder_loop(
                 DecCmd::Seek { secs } => {
                     let or = out_rate.load(Ordering::Relaxed) as f64;
                     pos.store((secs * or) as u64, Ordering::Relaxed);
+                    // Svuota il ring: altrimenti si sente l'audio vecchio
+                    // bufferizzato prima del salto (glitch).
+                    ring.lock().unwrap().clear();
                     // Seek = riapre il brano corrente alla posizione indicata.
                     if let Some(a) = active.as_mut() {
                         let t = a.track.clone();

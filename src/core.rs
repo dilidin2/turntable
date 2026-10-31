@@ -242,6 +242,12 @@ impl Player {
     }
 
     pub fn seek(&self, secs: f64) -> Change {
+        // Clampa a [0, durata] per evitare seek oltre la fine del brano.
+        let secs = {
+            let g = self.inner.lock().unwrap();
+            let dur = g.queue.get(g.current).map(|t| t.duration).unwrap_or(0.0);
+            secs.clamp(0.0, dur)
+        };
         self.engine.send(DecCmd::Seek { secs });
         self.engine.set_position_frames(secs);
         Change::Seeked
