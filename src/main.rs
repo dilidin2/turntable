@@ -4,10 +4,10 @@ use std::sync::Arc;
 
 use tokio::sync::mpsc;
 
-use player::core::{Change, Player};
-use player::mpris::{emit_change, MprisPlayer, MprisRoot};
+use turntable::core::{Change, Player};
+use turntable::mpris::{emit_change, MprisPlayer, MprisRoot};
 
-const BUS_NAME: &str = "org.mpris.MediaPlayer2.player";
+const BUS_NAME: &str = "org.mpris.MediaPlayer2.turntable";
 const OBJECT_PATH: &str = "/org/mpris/MediaPlayer2";
 
 #[tokio::main]

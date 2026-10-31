@@ -1,11 +1,11 @@
 [package]
-name = "player"
+name = "turntable"
 version = "0.1.0"
 edition = "2021"
 description = "Player musicale headless con interfaccia MPRIS su D-Bus"
 
 [[bin]]
-name = "player"
+name = "turntable"
 path = "src/main.rs"
 
 [dependencies]

@@ -1049,19 +1049,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f6b464fbc74e149a392436b17d523f769e057cb6877f6a5c4618bc6f11800548"
 
 [[package]]
-name = "player"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "cpal",
- "lofty",
- "rand",
- "symphonia",
- "tokio",
- "zbus",
-]
-
-[[package]]
 name = "polling"
 version = "3.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1609,6 +1596,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "db97caf9d906fbde555dd62fa95ddba9eecfd14cb388e4f491a66d74cd5fb79a"
 dependencies = [
  "once_cell",
+]
+
+[[package]]
+name = "turntable"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "cpal",
+ "lofty",
+ "rand",
+ "symphonia",
+ "tokio",
+ "zbus",
 ]
 
 [[package]]

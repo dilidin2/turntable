@@ -1,0 +1,12 @@
+[Unit]
+Description=Turntable - music player (MPRIS)
+After=pipeWire.service
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/turntable
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=default.target
