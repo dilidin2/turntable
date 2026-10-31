@@ -1,0 +1,22 @@
+[package]
+name = "player"
+version = "0.1.0"
+edition = "2021"
+description = "Player musicale headless con interfaccia MPRIS su D-Bus"
+
+[[bin]]
+name = "player"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time"] }
+zbus = "4"
+symphonia = { version = "0.5", features = ["mp3", "flac", "ogg", "isomp4"] }
+cpal = "0.15"
+lofty = "0.22"
+rand = "0.8"
+anyhow = "1"
+
+[profile.release]
+opt-level = 3
+lto = true
