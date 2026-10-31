@@ -209,11 +209,20 @@ impl Engine {
             move |data: &mut cpal::Data, _: &cpal::OutputCallbackInfo| {
                 if let Some(buf) = data.as_slice_mut::<f32>() {
                     let mut g = ring_cb.lock().unwrap();
+                    // Conta solo i campioni REALI drenati dal ring: in pause il
+                    // ring e' vuoto (esce silenzio) e la posizione non deve avanzare.
+                    let mut real = 0usize;
                     for slot in buf.iter_mut() {
-                        *slot = g.pop_front().unwrap_or(0.0);
+                        *slot = match g.pop_front() {
+                            Some(s) => {
+                                real += 1;
+                                s
+                            }
+                            None => 0.0,
+                        };
                     }
-                    // Posizione: i frame usciti dal ring (buf.len()/2 = frame stereo).
-                    pos_cb.fetch_add((buf.len() / 2) as u64, Ordering::Relaxed);
+                    // Posizione: i frame reali usciti dal ring (real/2 = frame stereo).
+                    pos_cb.fetch_add((real / 2) as u64, Ordering::Relaxed);
                 }
             },
             |err| eprintln!("audio: {err}"),
