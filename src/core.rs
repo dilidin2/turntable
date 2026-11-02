@@ -206,9 +206,14 @@ impl Player {
     }
 
     pub fn play_pause(&self) -> Change {
-        match self.inner.lock().unwrap().status {
-            Status::Playing => self.pause(),
-            _ => self.play(),
+        // ATTENZIONE: NON tenere il lock durante la chiamata a pause()/play()
+        // (che ri-acquisiscono lo stesso Mutex non re-entrant → deadlock).
+        // Leggi lo stato, rilascia il lock, poi agisci.
+        let is_playing = self.inner.lock().unwrap().status == Status::Playing;
+        if is_playing {
+            self.pause()
+        } else {
+            self.play()
         }
     }
 
