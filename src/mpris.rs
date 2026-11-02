@@ -197,6 +197,9 @@ impl MprisPlayer {
     }
 
     #[zbus(property)]
+    fn can_control(&self) -> bool { true }
+
+    #[zbus(property)]
     fn can_play(&self) -> bool { true }
 
     #[zbus(property)]
