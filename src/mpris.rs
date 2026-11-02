@@ -182,6 +182,53 @@ impl MprisPlayer {
         self.player.can_go_prev()
     }
 
+    // ---- Capacità standard MPRIS (serve a Quickshell openUri/play) ----
+
+    #[zbus(property)]
+    fn supported_uri_schemes(&self) -> Vec<String> {
+        vec!["file".into()]
+    }
+
+    #[zbus(property)]
+    fn supported_mime_types(&self) -> Vec<String> {
+        vec!["audio/mpeg".into(), "audio/flac".into(), "audio/ogg".into(),
+             "audio/opus".into(), "audio/mp4".into(), "audio/x-wav".into(),
+             "audio/*".into()]
+    }
+
+    #[zbus(property)]
+    fn can_play(&self) -> bool { true }
+
+    #[zbus(property)]
+    fn can_pause(&self) -> bool { true }
+
+    #[zbus(property)]
+    fn can_stop(&self) -> bool { true }
+
+    #[zbus(property)]
+    fn can_seek(&self) -> bool { true }
+
+    #[zbus(property)]
+    fn can_quit(&self) -> bool { true }
+
+    #[zbus(property)]
+    fn can_raise(&self) -> bool { false }
+
+    #[zbus(property)]
+    fn can_set_fullscreen(&self) -> bool { false }
+
+    #[zbus(property)]
+    fn fullscreen(&self) -> bool { false }
+
+    #[zbus(property)]
+    fn playback_rate(&self) -> f64 { 1.0 }
+
+    #[zbus(property)]
+    fn minimum_rate(&self) -> f64 { 1.0 }
+
+    #[zbus(property)]
+    fn maximum_rate(&self) -> f64 { 1.0 }
+
     // ---- Metodi ----
 
     async fn play(&self) -> Result<(), Error> {
