@@ -3,6 +3,11 @@ name = "turntable"
 version = "0.1.0"
 edition = "2021"
 description = "Player musicale headless con interfaccia MPRIS su D-Bus"
+authors = ["dilidin2 <dilidin2@users.noreply.github.com>"]
+license = "MIT"
+repository = "https://github.com/dilidin2/turntable"
+keywords = ["mpris", "music", "player", "quickshell", "dbus"]
+categories = ["multimedia", "multimedia::audio"]
 
 [[bin]]
 name = "turntable"
