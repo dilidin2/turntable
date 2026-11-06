@@ -26,6 +26,9 @@ proprietà `LoopStatus` restituisce i valori che si aspetta
 (`"off"` / `"track"` / `"playlist"`). È intenzionale: Quickshell è l'unico
 client di turntable.
 
+Il shell Quickshell che integra turntable vive nel repo
+[dotfiles](https://github.com/dilidin2/dotfiles).
+
 ## Requisiti
 
 - Rust (cargo)
