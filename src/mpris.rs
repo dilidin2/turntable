@@ -392,6 +392,13 @@ impl MprisRoot {
 
 #[zbus::interface(name = "org.mpris.MediaPlayer2")]
 impl MprisRoot {
+    // Identity: nome leggibile del player. Obbligatorio nello spec MPRIS;
+    // se manca Quickshell lo segnala ("Identity missing").
+    #[zbus(property)]
+    fn identity(&self) -> String {
+        "Turntable".into()
+    }
+
     #[zbus(property)]
     fn desktop_entry(&self) -> String {
         String::new()

@@ -46,10 +46,14 @@ impl Repeat {
         }
     }
     pub fn to_mpris(self) -> &'static str {
+        // LoopStatus: turntable e' usato solo da Quickshell, e la sua
+        // DBusDataTransform<MprisLoopState>::fromWire si aspetta "None" | "Track" |
+        // "Playlist" (non lo standard MPRIS "off"/"track"/"playlist").
+        // from_mpris() li gestisce gia' (fa lowercase).
         match self {
-            Repeat::Off => "none",
-            Repeat::Track => "track",
-            Repeat::Playlist => "playlist",
+            Repeat::Off => "None",
+            Repeat::Track => "Track",
+            Repeat::Playlist => "Playlist",
         }
     }
 }
